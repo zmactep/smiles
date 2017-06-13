@@ -5,9 +5,9 @@ version:             0.1.0.0
 homepage:            https://github.com/zmactep/smiles#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Pavel Yakovlev
-maintainer:          pavel@yakovlev.me
-copyright:           (c) 2017, Pavel Yakovlev
+author:              Artem Kondyukov, Pavel Yakovlev
+maintainer:          kondiukov@biocad.ru
+copyright:           (c) 2017, Artem Kondukov et al.
 category:            Bioinformatics
 build-type:          Simple
 extra-source-files:  README.md
