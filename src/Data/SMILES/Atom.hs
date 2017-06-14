@@ -1,6 +1,7 @@
 module Data.SMILES.Atom where
 
-import Data.Text (Text)
+import           Data.Char (toLower)
+import           Data.Text (Text, unpack)
 
 data Atom = BracketAtom Bracket
           | SimpleAtom AtomSymbol
@@ -10,7 +11,13 @@ data AtomSymbol = AromaticAtom Organic
                 | AliphaticAtom Organic
                 | OtherAtom Text
                 | WildcardAtom
-  deriving (Show, Read, Eq, Ord)
+  deriving (Read, Eq, Ord)
+
+instance Show AtomSymbol where
+  show (AromaticAtom o)  = toLower <$> show o
+  show (AliphaticAtom o) = show o
+  show (OtherAtom t)     = unpack t
+  show WildcardAtom      = "*"
 
 data Organic = F | Cl | Br | I | B | C | N | O | S | P
   deriving (Show, Read, Eq, Ord, Bounded, Enum)

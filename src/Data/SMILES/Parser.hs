@@ -1,14 +1,12 @@
 module Data.SMILES.Parser where
 
-import Text.Megaparsec
-import Text.Megaparsec.Text
-import Text.Megaparsec.Lexer
+import           Text.Megaparsec
+import           Text.Megaparsec.Lexer
+import           Text.Megaparsec.Text
 
-import Data.SMILES
-import Data.SMILES.Atom
-import Data.SMILES.Bond
-import Data.SMILES.Atom.Parser
-import Data.SMILES.Bond.Parser
+import           Data.SMILES
+import           Data.SMILES.Atom.Parser
+import           Data.SMILES.Bond.Parser
 
 smilesP :: Parser SMILES
 smilesP = do atom <- Atom <$> atomP

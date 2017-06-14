@@ -1,7 +1,7 @@
 name:                smiles
 version:             0.1.0.0
 -- synopsis:
--- description:
+description:         Full support of OpenSMILES specification for Haskell
 homepage:            https://github.com/zmactep/smiles#readme
 license:             BSD3
 license-file:        LICENSE
@@ -17,10 +17,13 @@ library
   hs-source-dirs:      src
   exposed-modules:     Data.SMILES.Atom
                      , Data.SMILES.Atom.Parser
+                     , Data.SMILES.Atom.Writer
                      , Data.SMILES.Bond
                      , Data.SMILES.Bond.Parser
+                     , Data.SMILES.Bond.Writer
                      , Data.SMILES
                      , Data.SMILES.Parser
+                     , Data.SMILES.Writer
   build-depends:       base >= 4.7 && < 5
                      , megaparsec
                      , text

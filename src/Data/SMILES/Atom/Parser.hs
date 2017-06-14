@@ -14,15 +14,16 @@ atomP = bracketAtomP <|> (SimpleAtom <$> aliphaticAtomP)
                      <|> (SimpleAtom <$> wildcardAtomP)
 
 bracketAtomP :: Parser Atom
-bracketAtomP = do char '['
-                  isotope <- (fromIntegral <$>) <$> optional integer
-                  element <- otherAtomP <|> aliphaticAtomP <|> aromaticAtomP <|> wildcardAtomP
-                  chirality <- optional chiralityP
-                  hCount <- optional hCountP
-                  charge <- optional chargeP
-                  class' <- optional classP
-                  char ']'
-                  pure $ BracketAtom $ Bracket element isotope chirality hCount charge class'
+bracketAtomP = do
+  _ <- char '['
+  isotope <- (fromIntegral <$>) <$> optional integer
+  element <- otherAtomP <|> aliphaticAtomP <|> aromaticAtomP <|> wildcardAtomP
+  chirality <- optional chiralityP
+  hCount <- optional hCountP
+  charge <- optional chargeP
+  class' <- optional classP
+  _ <- char ']'
+  pure $ BracketAtom $ Bracket element isotope chirality hCount charge class'
 
 chiralityP :: Parser Chirality
 chiralityP = try (char '@' >> (char '@' >> pure Clockwise) <|> (read <$> choice xs)) <|>
