@@ -69,6 +69,15 @@ moleculeSpecSep =
       writeSmiles (SMILES $ replicate 3 (S.Atom $ ali C)) `shouldBe` "CCC"
       writeSmiles (SMILES [S.Atom $ ali C, S.Atom $ ali N, S.Atom $ ali N]) `shouldBe` "CNN"
 
+    it "incorrect SMILES parsing" $ do
+      parseSmiles "C()C" `shouldBe` Nothing
+      parseSmiles "=CC" `shouldBe` Nothing
+      parseSmiles "C(CCC=)" `shouldBe` Nothing
+      parseSmiles "CC==C" `shouldBe` Nothing
+      parseSmiles "C(==O)CCC" `shouldBe` Nothing
+      parseSmiles "Cl[C@@H](==N)C" `shouldBe` Nothing
+      parseSmiles "C(1CC)CCC" `shouldBe` Nothing
+
 checkSpecSim :: Text -> Expectation
 checkSpecSim smi = fmap writeSmiles (parseSmiles smi) `shouldBe` Just smi
 
@@ -80,8 +89,9 @@ moleculeSpecSim =
       checkSpecSim "CCCNCCC"
 
     it "aliphatic branching molecules" $ do
-      checkSpecSim "C(C)C(C)C(C)C"
+      checkSpecSim "C(=C)C(=C)C(C)C"
       checkSpecSim "C(C(CC(C)C)C)"
+      checkSpecSim "C(C=CCC)CCCCC=CC"
 
     it "aliphatic cyclic molecules" $ do
       checkSpecSim "C1CCCCC1"
@@ -101,6 +111,11 @@ moleculeSpecSim =
       checkSpecSim "C[C@H](Nc1ncc(Cl)c(Nc2cc(C)n[nH]2)n1)c3ncc(F)cn3CC(C)(C)c1cc(CN(C(=O)CN(Cc2ccc(Cl)cc2)S(=O)(=O)c3c(F)c(F)c(F)c(F)c3F)c4ccc(C(=O)O)c(O)c4)cc(c1)C(C)(C)C"
       checkSpecSim "NC(=O)C[C@@H]1NC(=O)C2(CCCCC2)NC(=O)[C@H](Cc3ccc(CP(=O)(O)O)cc3)NC(=O)Cn4cc(CCCNC(=O)[C@H](CC(=O)N)NC(=O)C5(CCCCC5)NC(=O)[C@H](Cc6ccc(CP(=O)(O)O)cc6)NC(=O)Cn7cc(CCCNC1=O)nn7)nn4"
       checkSpecSim "C[C@@H]1O[C@@H](OC[C@H]2O[C@@H](O[C@@](C)(CCC(=O)C(=C)C)[C@H]3CC[C@]4(C)[C@@H]3[C@H](O)C[C@@H]5[C@@]6(C)C[C@@H](O)[C@H](O[C@@H]7O[C@H](CO)[C@@H](O)[C@H](O)[C@H]7O[C@@H]8O[C@H](CO)[C@@H](O)[C@H](O)[C@H]8O)C(C)(C)[C@@H]6CC[C@@]45C)[C@H](O)[C@@H](O)[C@@H]2O)[C@H](O)[C@H](O)[C@H]1O"
+
+    it "syntactically correct, but semantically wrong" $ do
+      checkSpecSim "C1CCCC2"
+      checkSpecSim "[216C@@H2+](C)(C)(C)CcC"
+      checkSpecSim "C#C#C#[12CH]"
 
 main :: IO ()
 main = hspec $ do

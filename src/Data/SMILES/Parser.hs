@@ -9,20 +9,26 @@ import           Data.SMILES.Atom.Parser
 import           Data.SMILES.Bond.Parser
 
 smilesP :: Parser SMILES
-smilesP = do atom <- Atom <$> atomP
-             rest <- many chainTokenP
-             pure $ SMILES (atom:rest)
+smilesP = do atom <- atomPackP
+             rest <- concat <$> many chainPackP
+             pure $ SMILES (atom ++ rest)
 
-chainTokenP :: Parser ChainToken
-chainTokenP = (Atom <$> atomP) <|> (Bond <$> bondP) <|> ringP <|> branchP
+atomPackP :: Parser [ChainToken]
+atomPackP = do atom <- Atom <$> atomP
+               ringBonds <- many ringP
+               branches <- many branchP
+               pure $ (atom : ringBonds) ++ branches
+
+chainPackP :: Parser [ChainToken]
+chainPackP = do bondMb <- optional (Bond <$> bondP)
+                atomPacks <- concat <$> some atomPackP
+                rest <- concat <$> many chainPackP
+                case bondMb of
+                  Nothing   -> pure $ atomPacks ++ rest
+                  Just bond -> pure $ bond : atomPacks ++ rest
 
 branchP :: Parser ChainToken
-branchP = Branch <$> between (char '(') (char ')') branchHelperP
-  where branchHelperP = do bondMb <- optional (Bond <$> bondP)
-                           SMILES rest <- smilesP
-                           case bondMb of
-                             Just bond -> pure $ SMILES (bond:rest)
-                             Nothing   -> pure $ SMILES rest
+branchP = Branch <$> between (char '(') (char ')') (SMILES <$> chainPackP)
 
 ringP :: Parser ChainToken
 ringP = RingClosure <$> ringHelperP
