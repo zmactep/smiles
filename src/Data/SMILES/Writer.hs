@@ -12,7 +12,12 @@ import           Data.SMILES.Bond.Writer (writeBond)
 writeToken :: ChainToken -> Text
 writeToken (Atom a)        = writeAtom a
 writeToken (Bond b)        = writeBond b
-writeToken (RingClosure r) = pack $ show r
+writeToken (RingClosure Nothing r)  | r < 10 = pack $ show r
+                                    | otherwise = pack $ "%" ++ show r
+writeToken (RingClosure (Just b) r) | r < 10 = T.concat [writeBond b, pack $ show r]
+                                    | otherwise = T.concat [pack "%", writeBond b, pack $ show r]
+-- writeToken (RingClosure r) | r < 10 = pack $ show r
+--                            | otherwise = pack $ "%" ++ show r
 writeToken (Branch b)      = T.concat ["(", writeSmiles b, ")"]
 
 writeSmiles :: SMILES -> Text

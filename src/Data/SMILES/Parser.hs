@@ -15,7 +15,7 @@ smilesP = do atom <- atomPackP
 
 atomPackP :: Parser [ChainToken]
 atomPackP = do atom <- Atom <$> atomP
-               ringBonds <- many ringP
+               ringBonds <- many $ try ringP
                branches <- many branchP
                pure $ (atom : ringBonds) ++ branches
 
@@ -31,9 +31,10 @@ branchP :: Parser ChainToken
 branchP = Branch <$> between (char '(') (char ')') (SMILES <$> chainPackP)
 
 ringP :: Parser ChainToken
-ringP = RingClosure <$> ringHelperP
-  where ringHelperP :: Parser Int
-        ringHelperP = do pcMb <- optional $ char '%'
-                         case pcMb of
-                           Just _  -> fromIntegral <$> integer
-                           Nothing -> read . pure <$> digitChar
+ringP = do bondMb <- optional bondP
+           pcMb <- optional $ char '%'
+           i <- case pcMb of
+             Just _  -> fromIntegral <$> integer
+             Nothing -> read . pure <$> digitChar
+
+           return $ RingClosure bondMb i
