@@ -28,7 +28,7 @@ bracketAtomP = do
 chiralityP :: Parser Chirality
 chiralityP = try (char '@' >> (char '@' >> pure Clockwise) <|> (read <$> choice xs)) <|>
              (char '@' >> pure AntiClockwise)
-  where xs = string . show <$> [TH1 .. OH30]
+  where xs = string . show <$> [TH1 .. OH3]
 
 hCountP :: Parser Int
 hCountP = do mbNum <- char 'H' >> optional integer
