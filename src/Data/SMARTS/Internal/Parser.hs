@@ -1,6 +1,8 @@
 module Data.SMARTS.Internal.Parser where
 
+import           Data.Maybe                 (fromMaybe)
 import           Data.SMARTS.Internal.Types
+import           Data.SMILES.Atom           (Chirality (..))
 import           Data.Text                  (pack)
 import           Text.Megaparsec
 import           Text.Megaparsec.Lexer
@@ -205,8 +207,8 @@ chiralityP = try $ do
   presence <- presenceP
   case (cw, chClass, presence) of
     (Nothing, Nothing, Present) -> return (CounterClockwise neg)
-    (Just _, Nothing, Present)  -> return (Clockwise neg)
-    (Nothing, Just ch, pres)    -> return (Chirality neg ch pres)
+    (Just _, Nothing, Present)  -> return (ClockwiseCh neg)
+    (Nothing, Just ch, pres)    -> return (ChiralityClass neg ch pres)
     _                           -> fail "Error: no parse."
 
 atomicMassP :: Parser Specification
@@ -228,9 +230,7 @@ genericSpecP constructor sym def = try $ do
   neg <- negationP
   _ <- char sym
   num <- optional int
-  case num of
-    Nothing -> return (constructor neg def)
-    Just n  -> return (constructor neg n)
+  return (constructor neg (fromMaybe def num))
 
 
 -- *** Primitive atom parser

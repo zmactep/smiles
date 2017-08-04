@@ -13,7 +13,7 @@ module Data.SMARTS (SMARTS (..),
                     Specification (..),
                     Presence (..),
                     Negation (..),
-                    ChiralityClass (..),
+                    Chirality (..),
                     PrimitiveAtom (..),
                     parseSmarts,
                     smartsP,
@@ -22,6 +22,7 @@ module Data.SMARTS (SMARTS (..),
 import           Data.SMARTS.Internal.Parser
 import           Data.SMARTS.Internal.Types
 import           Data.SMARTS.Internal.Writer
+import           Data.SMILES.Atom            (Chirality (..))
 import           Data.Text
 import           Text.Megaparsec
 
