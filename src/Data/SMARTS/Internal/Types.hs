@@ -70,6 +70,7 @@ data Specification = Explicit Negation PrimitiveAtom
                    | ChiralityClass Negation Chirality Presence
                    | AtomicMass Negation Int
                    | Recursive Negation SMARTS
+                   | Class Int
   deriving (Eq, Ord)
 
 instance Show Specification where
@@ -90,6 +91,7 @@ instance Show Specification where
   show (ChiralityClass neg chClass pres) = concat [show neg, "@", show chClass, show pres]
   show (AtomicMass neg num) = show neg ++ show num
   show (Recursive neg smarts) = concat [show neg, "$(", show smarts, ")"]
+  show (Class num) = ':' : show num
 
 showSpec :: Negation -> Int -> String -> String
 showSpec neg num sym | num == 1 = show neg ++ sym

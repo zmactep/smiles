@@ -153,7 +153,8 @@ specificationP = explicitP <|>
                  atomicNumberP <|>
                  chiralityP <|>
                  atomicMassP <|>
-                 recursiveP
+                 recursiveP <|>
+                 labelP
 
 explicitP :: Parser Specification
 explicitP = try $ do
@@ -224,6 +225,9 @@ recursiveP = do
   smarts <- smartsP
   _ <- char ')'
   return (Recursive neg smarts)
+
+labelP :: Parser Specification
+labelP = Class <$> (char ':' >> int)
 
 genericSpecP :: (Negation -> Int -> Specification) -> Char -> Int -> Parser Specification
 genericSpecP constructor sym def = try $ do

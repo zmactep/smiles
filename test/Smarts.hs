@@ -89,6 +89,9 @@ specificAtomTests = describe "Various atom description patterns." $ do
   thereAndBackAgain "cno[!+2,!+,!-&H1;$([C,N,O,F]=*=*=[At])]"
   thereAndBackAgain "[C,S](=[O,S,P])-[O;H1,-1]"
   thereAndBackAgain "[C!@OH21?$(C/?C\\o#o:P)]"
+  thereAndBackAgain "[c:1][N;H2:2]"
+  thereAndBackAgain "[c:1][O:2]CC"
+  thereAndBackAgain "[O:2]CC[N;O:3]"
 
 stolenFromSmilesTests :: Spec
 stolenFromSmilesTests = describe "SMILES string should be a valid SMARTS pattern." $ do
