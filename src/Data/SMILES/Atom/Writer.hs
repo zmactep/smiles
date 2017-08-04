@@ -10,7 +10,7 @@ import           Data.SMILES.Atom
 writeChirality :: Chirality -> String
 writeChirality Clockwise     = "@@"
 writeChirality AntiClockwise = "@"
-writeChirality c             = show c
+writeChirality c             = '@':show c
 
 writeHs :: Int -> String
 writeHs 0 = ""
