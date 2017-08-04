@@ -2,9 +2,10 @@
 
 import           Test.Hspec
 
-import Data.SMARTS
-import Text.Megaparsec
-import Data.Text
+import           Data.Maybe      (isNothing)
+import           Data.SMARTS
+import           Data.Text
+import           Text.Megaparsec
 
 main :: IO ()
 main = hspec $ do
@@ -12,17 +13,21 @@ main = hspec $ do
   specificAtomTests
   stolenFromSmilesTests
   tediousTests
+  invalidSyntaxTests
 
 testSuite :: String -> Expectation
 testSuite target = smarts `shouldSatisfy` smartsCmp target
   where
-    result = parse parseSmarts "" (pack target)
+    result = parseSmarts (pack target)
     smarts = case result of
-      Right syntaxTree -> writeSmarts syntaxTree
-      Left err -> show err
+      Just syntaxTree -> writeSmarts syntaxTree
+      Nothing         -> ""
 
 thereAndBackAgain :: String -> Spec
 thereAndBackAgain target = it target $ testSuite target
+
+invalidSyntax :: String -> Spec
+invalidSyntax target = it target $ parseSmarts (pack target) `shouldSatisfy` isNothing
 
 smartsCmp :: String -> String -> Bool
 smartsCmp [] [] = True
@@ -134,3 +139,15 @@ tediousTests = describe "Complex patterns including resursive SMARTS, disconnect
   thereAndBackAgain "[$([N;!H0;v3,v4&+1]),$([O,S;H1;+0]),n&H1&+0]"
   thereAndBackAgain "[$([O,S;H1;v2;!$(*-*=[O,N,P,S])]),$([O,S;H0;v2]),$([O,S;-]),$([N;v3;!$(N-*=[O,N,P,S])]),n&H0&+0,$([o,s;+0;!$([o,s]:n);!$([o,s]:c:n)])]"
   thereAndBackAgain "[#7;+,$([N;H2&+0][$([C,a]);!$([C,a](=O))]),$([N;H1&+0]([$([C,a]);!$([C,a](=O))])[$([C,a]);!$([C,a](=O))]),$([N;H0&+0]([C;!$(C(=O))])([C;!$(C(=O))])[C;!$(C(=O))])]"
+
+invalidSyntaxTests :: Spec
+invalidSyntaxTests = describe "Parser should fail on these." $ do
+  invalidSyntax "C()C"
+  invalidSyntax "C(CCC=)"
+  invalidSyntax "C(1CC)CCC"
+  invalidSyntax "CC(CCCC(C)C)C1CCC2C1(CCC3C2CC=C4C3(CCC(C4-)O)C)C"
+  invalidSyntax "O[C@@H]1[C@@H](O)[C@@H](OC(O)[C@H]]1O)CO"
+  invalidSyntax "C(=C)(C(=C)C(C)C"
+  invalidSyntax "CCCN#2CCC"
+  invalidSyntax "O=C(O)Cc2c1ccccdc1nc2"
+  invalidSyntax "c12c(cccc1)CN(C([C@H](c1cn(C)nc1)NC)=O)Cc1ccccc1-2"

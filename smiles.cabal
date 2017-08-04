@@ -1,11 +1,11 @@
 name:                smiles
 version:             0.1.1.0
 -- synopsis:
-description:         Full support of OpenSMILES specification for Haskell
+description:         Full support of OpenSMILES and SMARTS specifications for Haskell
 homepage:            https://github.com/zmactep/smiles#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Artem Kondyukov, Pavel Yakovlev
+author:              Artem Kondyukov, Pavel Yakovlev, Vladimir Morozov
 maintainer:          kondiukov@biocad.ru
 copyright:           (c) 2017, Artem Kondukov et al.
 category:            Bioinformatics

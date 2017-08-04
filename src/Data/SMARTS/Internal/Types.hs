@@ -171,24 +171,22 @@ instance Show BondExpression where
   show (BondExpression expr) = intercalate ";" $ map show expr
 
 
-data Component = UnitComponent SpecificAtom | ImplicitSingle SpecificAtom Component | CompoundComponent SpecificAtom BondExpression Component
+newtype Component = Component [(BondExpression, SpecificAtom)]
   deriving (Eq, Ord)
 
 instance Show Component where
-  show (UnitComponent unit) = show unit
-  show (ImplicitSingle unit component) = show unit ++ show component
-  show (CompoundComponent unit bond component) = concat [show unit, show bond, show component]
+  show (Component component) = concatMap (\(a, b) -> show a ++ show b) component
 
 
-data Branch = Linear BondExpression Component | Compound BondExpression Component [Branch]
+data Branch = Linear Component | Compound Component [Branch]
   deriving (Eq, Ord)
 
 instance Show Branch where
-  show (Linear bond unit) = show bond ++ show unit
-  show (Compound bond unit branch) = concat ["(", show bond, show unit, concatMap show branch, ")"]
+  show (Linear unit) = show unit
+  show (Compound unit branch) = concat ["(", show unit, concatMap show branch, ")"]
 
-data SMARTS = SMARTS Component [Branch]
+newtype SMARTS = SMARTS [Branch]
   deriving (Eq, Ord)
 
 instance Show SMARTS where
-  show (SMARTS component list) = show component ++ concatMap show list
+  show (SMARTS list) = concatMap show list

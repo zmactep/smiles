@@ -77,6 +77,7 @@ moleculeSpecSep =
       parseSmiles "C(==O)CCC" `shouldBe` Nothing
       parseSmiles "Cl[C@@H](==N)C" `shouldBe` Nothing
       parseSmiles "C(1CC)CCC" `shouldBe` Nothing
+      parseSmiles "ccdc" `shouldBe` Nothing
 
 checkSpecSim :: Text -> Expectation
 checkSpecSim smi = fmap writeSmiles (parseSmiles smi) `shouldBe` Just smi
@@ -112,7 +113,7 @@ moleculeSpecSim =
       checkSpecSim "C[C@TB15]C"
       checkSpecSim "C[C@TB15]C"
       checkSpecSim "C[C@TB1]C"
-      
+
 
     it "Complex cases" $ do
       checkSpecSim "C[C@H](Nc1ncc(Cl)c(Nc2cc(C)n[nH]2)n1)c3ncc(F)cn3CC(C)(C)c1cc(CN(C(=O)CN(Cc2ccc(Cl)cc2)S(=O)(=O)c3c(F)c(F)c(F)c(F)c3F)c4ccc(C(=O)O)c(O)c4)cc(c1)C(C)(C)C"

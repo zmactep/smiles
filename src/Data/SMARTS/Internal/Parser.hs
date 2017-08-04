@@ -6,43 +6,30 @@ import           Text.Megaparsec
 import           Text.Megaparsec.Lexer
 import           Text.Megaparsec.Text
 
-parseSmarts :: Parser SMARTS
-parseSmarts = do
-  unit <- componentP
+smartsP :: Parser SMARTS
+smartsP = do
   other <- many branchP
-  return (SMARTS unit other)
+  return (SMARTS other)
 
 -- *** Branch parser
 
 branchP :: Parser Branch
-branchP = compoundBranchP <|> (Linear <$> bondExpressionP <*> componentP)
+branchP = compoundBranchP <|> (Linear <$> componentP)
 
 compoundBranchP :: Parser Branch
-compoundBranchP = try $ do
-  _ <- char '('
-  bond <- bondExpressionP
+compoundBranchP = between (char '(') (char ')') $ do
   unit <- componentP
-  branch <- many (try branchP)
-  _ <- char ')'
-  return (Compound bond unit branch)
+  branch <- many branchP
+  return (Compound unit branch)
 
 -- *** Component parser
 
 componentP :: Parser Component
-componentP = implicitSingleP <|> compoundComponentP <|> (UnitComponent <$> specificAtomP)
-
-compoundComponentP :: Parser Component
-compoundComponentP = try $ do
-  unit <- specificAtomP
+componentP = Component <$> some (do
   bond <- bondExpressionP
-  component <- componentP
-  return (CompoundComponent unit bond component)
+  atom <- specificAtomP
+  return (bond, atom))
 
-implicitSingleP :: Parser Component
-implicitSingleP = try $ do
-  unit <- specificAtomP
-  component <- componentP
-  return (ImplicitSingle unit component)
 
 -- *** Bond expressions parser
 
@@ -232,7 +219,7 @@ recursiveP :: Parser Specification
 recursiveP = do
   neg <- negationP
   _ <- string "$("
-  smarts <- parseSmarts
+  smarts <- smartsP
   _ <- char ')'
   return (Recursive neg smarts)
 
