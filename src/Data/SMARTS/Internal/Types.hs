@@ -65,7 +65,7 @@ data Specification = Explicit Negation PrimitiveAtom
                    | NegativeCharge Negation Int
                    | PositiveCharge Negation Int
                    | AtomicNumber Negation Int
-                   | CounterClockwise Negation
+                   | CounterClockwise Negation Presence
                    | ClockwiseCh Negation
                    | ChiralityClass Negation Chirality Presence
                    | AtomicMass Negation Int
@@ -86,7 +86,7 @@ instance Show Specification where
   show (NegativeCharge neg num) = showSpec neg num "-"
   show (PositiveCharge neg num) = showSpec neg num "+"
   show (AtomicNumber neg num) = show neg ++ ('#' : show num)
-  show (CounterClockwise neg) = show neg ++ "@"
+  show (CounterClockwise neg pres) = show neg ++ "@" ++ show pres
   show (ClockwiseCh neg) = show neg ++ "@@"
   show (ChiralityClass neg chClass pres) = concat [show neg, "@", show chClass, show pres]
   show (AtomicMass neg num) = show neg ++ show num
@@ -94,7 +94,7 @@ instance Show Specification where
   show (Class num) = ':' : show num
 
 showSpec :: Negation -> Int -> String -> String
-showSpec neg num sym | num == 1 = show neg ++ sym
+showSpec neg num sym | (num == 1) || (num < 0) = show neg ++ sym
                      | otherwise = concat [show neg, sym, show num]
 
 
@@ -134,7 +134,6 @@ instance Show Bond where
   show (Down neg presence) = show neg ++ ('\\' : show presence)
   show (Ring neg)          = show neg ++ "@"
   show (AnyBond neg)       = show neg ++ "~"
-
 
 newtype BondImplicitAnd = BondImplicitAnd [Bond]
   deriving (Eq, Ord)
