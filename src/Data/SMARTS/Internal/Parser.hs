@@ -207,10 +207,10 @@ chiralityP = try $ do
   chClass <- optional (read <$> choice (string . show <$> [TH1 .. OH3]))
   presence <- presenceP
   case (cw, chClass, presence) of
-    (Nothing, Nothing, Present) -> return (CounterClockwise neg)
-    (Just _, Nothing, Present)  -> return (ClockwiseCh neg)
-    (Nothing, Just ch, pres)    -> return (ChiralityClass neg ch pres)
-    _                           -> fail "Error: no parse."
+    (Nothing, Nothing, pres)   -> return (CounterClockwise neg pres)
+    (Just _, Nothing, Present) -> return (ClockwiseCh neg)
+    (Nothing, Just ch, pres)   -> return (ChiralityClass neg ch pres)
+    _                          -> fail "Error: no parse."
 
 atomicMassP :: Parser Specification
 atomicMassP = try $ do
