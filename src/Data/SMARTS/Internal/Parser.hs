@@ -60,9 +60,9 @@ bondP = doubleP <|>
         singleP
 
 singleP :: Parser Bond
-singleP = try $ do
+singleP = do
   neg <- negationP
-  _ <- char '-'
+  _ <- try $ char '-'
   return (Single neg)
 
 doubleP :: Parser Bond
