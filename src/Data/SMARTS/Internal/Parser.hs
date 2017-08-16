@@ -7,6 +7,7 @@ import           Data.Text                  (pack)
 import           Text.Megaparsec
 import           Text.Megaparsec.Lexer
 import           Text.Megaparsec.Text
+import Control.Monad(when, void)
 
 smartsP :: Parser SMARTS
 smartsP = do
@@ -62,7 +63,9 @@ bondP = doubleP <|>
 singleP :: Parser Bond
 singleP = do
   neg <- negationP
-  _ <- try $ char '-'
+  case neg of
+    Pass -> try $ char '-'
+    _    -> char '-'
   return (Single neg)
 
 doubleP :: Parser Bond

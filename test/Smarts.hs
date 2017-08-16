@@ -191,3 +191,4 @@ invalidSyntaxTests = describe "Parser should fail on these." $ do
   invalidSyntax "CCCN#2CCC"
   invalidSyntax "O=C(O)Cc2c1ccccdc1nc2"
   invalidSyntax "c12c(cccc1)CN(C([C@H](c1cn(C)nc1)NC)=O)Cc1ccccc1-2"
+  invalidSyntax "C!C"
