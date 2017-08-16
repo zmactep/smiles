@@ -17,12 +17,20 @@ fancyId :: Int -> String
 fancyId n | n <= 9 = show n
           | otherwise = '%':show n
 
-data SpecificAtom = Primitive PrimitiveAtom [Int] | Description AtomExpression [Int]
+
+data RingClosure = Closure BondExpression Int
+  deriving (Eq, Ord)
+
+instance Show RingClosure where
+  show (Closure bond idx) = show bond ++ fancyId idx
+
+
+data SpecificAtom = Primitive PrimitiveAtom [RingClosure] | Description AtomExpression [RingClosure]
   deriving (Eq, Ord)
 
 instance Show SpecificAtom where
-  show (Primitive prim idx)   = show prim ++ concatMap fancyId idx
-  show (Description expr idx) = concat ["[", show expr, "]", concatMap fancyId idx]
+  show (Primitive prim idx)   = show prim ++ concatMap show idx
+  show (Description expr idx) = concat ["[", show expr, "]", concatMap show idx]
 
 
 newtype AtomImplicitAnd = AtomImplicitAnd [Specification]

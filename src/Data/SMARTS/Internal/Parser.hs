@@ -115,15 +115,15 @@ anyBondP = do
 -- *** Specific atom parser
 
 specificAtomP :: Parser SpecificAtom
-specificAtomP = (Primitive <$> primitiveAtomP <*> many cycleP) <|> descriptionP
+specificAtomP = (Primitive <$> primitiveAtomP <*> many closureP) <|> descriptionP
 
 descriptionP :: Parser SpecificAtom
 descriptionP = do
   _ <- char '['
   expr <- atomExpressionP
   _ <- char ']'
-  cycleIdx <- many cycleP
-  return (Description expr cycleIdx)
+  closures <- many closureP
+  return (Description expr closures)
 
 -- *** Boolean expressions on Specifications
 
@@ -285,15 +285,16 @@ negationP = do
 int :: Parser Int
 int = fromIntegral <$> integer
 
-cycleP :: Parser Int
-cycleP = do
+closureP :: Parser RingClosure
+closureP = try $ do
+  bond <- bondExpressionP
   dd <- optional (char '%')
   c1 <- digitChar
   case dd of
-    Nothing -> return (read [c1])
+    Nothing -> return $ Closure bond (read [c1])
     Just _  -> do
       c2 <- digitChar
-      return (read [c1, c2])
+      return $ Closure bond (read [c1, c2])
 
 allAtoms :: [String]
 allAtoms =["Zr","Zn","Yb","Y","Xe","W","V","U","Tm","Tl",
