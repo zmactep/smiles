@@ -122,11 +122,11 @@ data Bond = Single Negation
           | Down Negation Presence
           | Ring Negation
           | AnyBond Negation
+          | Implicit
   deriving (Eq, Ord)
 
 instance Show Bond where
-  show (Single Negate)     = "!-"
-  show (Single Pass)       = ""
+  show (Single neg)        = show neg ++ "-"
   show (Double neg)        = show neg ++ "="
   show (Triple neg)        = show neg ++ "#"
   show (Aromatic neg)      = show neg ++ ":"
@@ -134,6 +134,7 @@ instance Show Bond where
   show (Down neg presence) = show neg ++ ('\\' : show presence)
   show (Ring neg)          = show neg ++ "@"
   show (AnyBond neg)       = show neg ++ "~"
+  show Implicit            = ""
 
 newtype BondImplicitAnd = BondImplicitAnd [Bond]
   deriving (Eq, Ord)

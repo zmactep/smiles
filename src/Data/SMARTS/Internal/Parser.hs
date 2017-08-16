@@ -7,7 +7,6 @@ import           Data.Text                  (pack)
 import           Text.Megaparsec
 import           Text.Megaparsec.Lexer
 import           Text.Megaparsec.Text
-import Control.Monad(when, void)
 
 smartsP :: Parser SMARTS
 smartsP = do
@@ -37,7 +36,10 @@ componentP = Component <$> some (do
 -- *** Bond expressions parser
 
 bondImplicitAndP :: Parser BondImplicitAnd
-bondImplicitAndP = BondImplicitAnd <$> some bondP
+bondImplicitAndP = do
+  bonds <- many bondP
+  let result = if null bonds then [Implicit] else bonds
+  return $ BondImplicitAnd result
 
 bondExplicitAndP :: Parser BondExplicitAnd
 bondExplicitAndP = BondExplicitAnd <$> bondImplicitAndP `sepBy` char '&'
@@ -51,21 +53,19 @@ bondExpressionP = BondExpression <$> bondOrP `sepBy` char ';'
 -- *** Bond parser
 
 bondP :: Parser Bond
-bondP = doubleP <|>
+bondP = singleP <|>
+        doubleP <|>
         tripleP <|>
         aromaticP <|>
         upDirectionP <|>
         downDirectionP <|>
         ringP <|>
-        anyBondP <|>
-        singleP
+        anyBondP
 
 singleP :: Parser Bond
-singleP = do
+singleP = try $ do
   neg <- negationP
-  case neg of
-    Pass -> try $ char '-'
-    _    -> char '-'
+  _ <- char '-'
   return (Single neg)
 
 doubleP :: Parser Bond
@@ -107,7 +107,7 @@ ringP = try $ do
   return (Ring neg)
 
 anyBondP :: Parser Bond
-anyBondP = try $ do
+anyBondP = do
   neg <- negationP
   _ <- char '~'
   return (AnyBond neg)
