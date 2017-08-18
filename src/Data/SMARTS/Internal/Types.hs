@@ -17,12 +17,20 @@ fancyId :: Int -> String
 fancyId n | n <= 9 = show n
           | otherwise = '%':show n
 
-data SpecificAtom = Primitive PrimitiveAtom [Int] | Description AtomExpression [Int]
+
+data RingClosure = Closure BondExpression Int
+  deriving (Eq, Ord)
+
+instance Show RingClosure where
+  show (Closure bond idx) = show bond ++ fancyId idx
+
+
+data SpecificAtom = Primitive PrimitiveAtom [RingClosure] | Description AtomExpression [RingClosure]
   deriving (Eq, Ord)
 
 instance Show SpecificAtom where
-  show (Primitive prim idx)   = show prim ++ concatMap fancyId idx
-  show (Description expr idx) = concat ["[", show expr, "]", concatMap fancyId idx]
+  show (Primitive prim idx)   = show prim ++ concatMap show idx
+  show (Description expr idx) = concat ["[", show expr, "]", concatMap show idx]
 
 
 newtype AtomImplicitAnd = AtomImplicitAnd [Specification]
@@ -122,11 +130,11 @@ data Bond = Single Negation
           | Down Negation Presence
           | Ring Negation
           | AnyBond Negation
+          | Implicit
   deriving (Eq, Ord)
 
 instance Show Bond where
-  show (Single Negate)     = "!-"
-  show (Single Pass)       = ""
+  show (Single neg)        = show neg ++ "-"
   show (Double neg)        = show neg ++ "="
   show (Triple neg)        = show neg ++ "#"
   show (Aromatic neg)      = show neg ++ ":"
@@ -134,6 +142,7 @@ instance Show Bond where
   show (Down neg presence) = show neg ++ ('\\' : show presence)
   show (Ring neg)          = show neg ++ "@"
   show (AnyBond neg)       = show neg ++ "~"
+  show Implicit            = ""
 
 newtype BondImplicitAnd = BondImplicitAnd [Bond]
   deriving (Eq, Ord)

@@ -16,6 +16,7 @@ module Data.SMARTS (SMARTS (..),
                     Negation (..),
                     Chirality (..),
                     PrimitiveAtom (..),
+                    RingClosure (..),
                     parseSmarts,
                     smartsP,
                     writeSmarts) where

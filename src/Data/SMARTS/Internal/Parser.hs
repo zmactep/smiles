@@ -36,7 +36,10 @@ componentP = Component <$> some (do
 -- *** Bond expressions parser
 
 bondImplicitAndP :: Parser BondImplicitAnd
-bondImplicitAndP = BondImplicitAnd <$> some bondP
+bondImplicitAndP = do
+  bonds <- many bondP
+  let result = if null bonds then [Implicit] else bonds
+  return $ BondImplicitAnd result
 
 bondExplicitAndP :: Parser BondExplicitAnd
 bondExplicitAndP = BondExplicitAnd <$> bondImplicitAndP `sepBy` char '&'
@@ -50,14 +53,14 @@ bondExpressionP = BondExpression <$> bondOrP `sepBy` char ';'
 -- *** Bond parser
 
 bondP :: Parser Bond
-bondP = doubleP <|>
+bondP = singleP <|>
+        doubleP <|>
         tripleP <|>
         aromaticP <|>
         upDirectionP <|>
         downDirectionP <|>
         ringP <|>
-        anyBondP <|>
-        singleP
+        anyBondP
 
 singleP :: Parser Bond
 singleP = try $ do
@@ -104,7 +107,7 @@ ringP = try $ do
   return (Ring neg)
 
 anyBondP :: Parser Bond
-anyBondP = try $ do
+anyBondP = do
   neg <- negationP
   _ <- char '~'
   return (AnyBond neg)
@@ -112,15 +115,15 @@ anyBondP = try $ do
 -- *** Specific atom parser
 
 specificAtomP :: Parser SpecificAtom
-specificAtomP = (Primitive <$> primitiveAtomP <*> many cycleP) <|> descriptionP
+specificAtomP = (Primitive <$> primitiveAtomP <*> many closureP) <|> descriptionP
 
 descriptionP :: Parser SpecificAtom
 descriptionP = do
   _ <- char '['
   expr <- atomExpressionP
   _ <- char ']'
-  cycleIdx <- many cycleP
-  return (Description expr cycleIdx)
+  closures <- many closureP
+  return (Description expr closures)
 
 -- *** Boolean expressions on Specifications
 
@@ -282,15 +285,16 @@ negationP = do
 int :: Parser Int
 int = fromIntegral <$> integer
 
-cycleP :: Parser Int
-cycleP = do
+closureP :: Parser RingClosure
+closureP = try $ do
+  bond <- bondExpressionP
   dd <- optional (char '%')
   c1 <- digitChar
   case dd of
-    Nothing -> return (read [c1])
+    Nothing -> return $ Closure bond (read [c1])
     Just _  -> do
       c2 <- digitChar
-      return (read [c1, c2])
+      return $ Closure bond (read [c1, c2])
 
 allAtoms :: [String]
 allAtoms =["Zr","Zn","Yb","Y","Xe","W","V","U","Tm","Tl",

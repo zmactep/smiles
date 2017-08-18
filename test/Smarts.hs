@@ -9,6 +9,7 @@ import           Text.Megaparsec
 
 main :: IO ()
 main = hspec $ do
+  innerStructureTests
   basicTests
   specificAtomTests
   stolenFromSmilesTests
@@ -36,6 +37,43 @@ smartsCmp (_:_) [] = False
 smartsCmp (x:xs) (y:ys) | x == y = smartsCmp xs ys
                         | (x == '1') || (x == '-') = smartsCmp xs (y:ys)
                         | otherwise = False
+
+singleBond :: BondExpression
+singleBond = BondExpression [BondOr [BondExplicitAnd [BondImplicitAnd [Single Pass]]]]
+
+implBond :: BondExpression
+implBond = BondExpression [BondOr [BondExplicitAnd [BondImplicitAnd [Implicit]]]]
+
+notSingleBond :: BondExpression
+notSingleBond = BondExpression [BondOr [BondExplicitAnd [BondImplicitAnd [Single Negate]]]]
+
+doubleBond :: BondExpression
+doubleBond = BondExpression [BondOr [BondExplicitAnd [BondImplicitAnd [Double Pass]]]]
+
+explNa :: AtomExpression
+explNa = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Explicit Pass $ Atom "Na"]]]]
+
+innerStructureTests :: Spec
+innerStructureTests = describe "SMARTS is parsed correctly." $ do
+  it "C" $ parseSmarts "C" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [])]])
+  it "CC" $ parseSmarts "CC" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []), (implBond, Primitive (Atom "C") [])]])
+  it "CN!-a=F" $ parseSmarts "CN!-a=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                    (implBond, Primitive (Atom "N") []),
+                                                                                    (notSingleBond, Primitive AnyAromatic []),
+                                                                                    (doubleBond, Primitive (Atom "F") [])]])
+  it "CNa=F" $ parseSmarts "CNa=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                (implBond, Primitive (Atom "N") []),
+                                                                                (implBond, Primitive AnyAromatic []),
+                                                                                (doubleBond, Primitive (Atom "F") [])]])
+  it "C[Na]=F" $ parseSmarts "C[Na]=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                    (implBond, Description explNa []),
+                                                                                    (doubleBond, Primitive (Atom "F") [])]])
+  it "C1C=CC=CC=1" $ parseSmarts "C1C=CC=CC=1" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [Closure implBond 1]),
+                                                                                            (implBond, Primitive (Atom "C") []),
+                                                                                            (doubleBond, Primitive (Atom "C") []),
+                                                                                            (implBond, Primitive (Atom "C") []),
+                                                                                            (doubleBond, Primitive (Atom "C") []),
+                                                                                            (implBond, Primitive (Atom "C") [Closure doubleBond 1])]])
 
 basicTests :: Spec
 basicTests = describe "Simple syntax constructions." $ do
@@ -188,6 +226,6 @@ invalidSyntaxTests = describe "Parser should fail on these." $ do
   invalidSyntax "CC(CCCC(C)C)C1CCC2C1(CCC3C2CC=C4C3(CCC(C4-)O)C)C"
   invalidSyntax "O[C@@H]1[C@@H](O)[C@@H](OC(O)[C@H]]1O)CO"
   invalidSyntax "C(=C)(C(=C)C(C)C"
-  invalidSyntax "CCCN#2CCC"
   invalidSyntax "O=C(O)Cc2c1ccccdc1nc2"
-  invalidSyntax "c12c(cccc1)CN(C([C@H](c1cn(C)nc1)NC)=O)Cc1ccccc1-2"
+  invalidSyntax "c12c(cccc1)CN(C([C@H](c1cn(C)nc1)NC)=O)Cc1ccccc1-2-"
+  invalidSyntax "C!C"
