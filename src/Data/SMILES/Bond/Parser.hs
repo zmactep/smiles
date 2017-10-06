@@ -1,9 +1,9 @@
 module Data.SMILES.Bond.Parser where
 
-import           Text.Megaparsec
-import           Text.Megaparsec.Text
-
 import           Data.SMILES.Bond
+import           Data.SMILES.ParserTypes (Parser)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char    (char)
 
 bondP :: Parser Bond
 bondP = (AliphaticBond <$> aliphaticBondP) <|>
