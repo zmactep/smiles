@@ -143,7 +143,9 @@ atomExpressionP = AtomExpression <$> atomOrP `sepBy` char ';'
 -- *** Specification parser
 
 specificationP :: Parser Specification
-specificationP = explicitP <|>
+specificationP = arylGroupP <|>
+                 heteroarylGroupP <|>
+                 explicitP <|>
                  degreeP <|>
                  attachedHP <|>
                  implicitHP <|>
@@ -221,6 +223,18 @@ atomicMassP = try $ do
   neg <- negationP
   num <- decimal
   return (AtomicMass neg num)
+
+arylGroupP :: Parser Specification
+arylGroupP = try $ do
+  neg <- negationP
+  _   <- stringP "AG"
+  return (ArylGroup neg)
+
+heteroarylGroupP :: Parser Specification
+heteroarylGroupP = try $ do
+  neg <- negationP
+  _   <- stringP "HG"
+  return (HeteroarylGroup neg)
 
 recursiveP :: Parser Specification
 recursiveP = do
