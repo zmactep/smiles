@@ -1,12 +1,12 @@
 module Data.SMILES.Atom.Parser where
 
-import           Data.Char             (toLower, toUpper)
-import           Data.Text             (pack)
-import           Text.Megaparsec
-import           Text.Megaparsec.Lexer
-import           Text.Megaparsec.Text
-
+import           Data.Char                  (toLower, toUpper)
 import           Data.SMILES.Atom
+import           Data.SMILES.ParserTypes    (Parser, stringP)
+import           Data.Text                  (pack)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char       (char)
+import           Text.Megaparsec.Char.Lexer (decimal)
 
 atomP :: Parser Atom
 atomP = bracketAtomP <|> (SimpleAtom <$> aliphaticAtomP)
@@ -16,7 +16,7 @@ atomP = bracketAtomP <|> (SimpleAtom <$> aliphaticAtomP)
 bracketAtomP :: Parser Atom
 bracketAtomP = do
   _ <- char '['
-  isotope <- (fromIntegral <$>) <$> optional integer
+  isotope <- optional decimal
   element <- otherAtomP <|> aliphaticAtomP <|> aromaticAtomP <|> wildcardAtomP
   chirality <- optional chiralityP
   hCount <- optional hCountP
@@ -28,38 +28,38 @@ bracketAtomP = do
 chiralityP :: Parser Chirality
 chiralityP = try (char '@' >> (char '@' >> pure Clockwise) <|> (read <$> choice xs)) <|>
              (char '@' >> pure AntiClockwise)
-  where xs = string . show <$> [TH1 .. OH3]
+  where xs = stringP . show <$> [TH1 .. OH3]
 
 hCountP :: Parser Int
-hCountP = do mbNum <- char 'H' >> optional integer
+hCountP = do mbNum <- char 'H' >> optional decimal
              case mbNum of
-               Just x  -> pure $ fromIntegral x
+               Just x  -> pure x
                Nothing -> pure 1
 
 chargeP :: Parser Int
 chargeP = signedCharge '-' (-1) <|> signedCharge '+' 1
   where signedCharge :: Char -> Int -> Parser Int
-        signedCharge c mul = do mbNum <- char c >> optional integer
+        signedCharge c mul = do mbNum <- char c >> optional decimal
                                 case mbNum of
-                                  Just x  -> pure $ mul * fromIntegral x
+                                  Just x  -> pure $ mul * x
                                   Nothing -> pure mul
 
 classP :: Parser Int
-classP = fromIntegral <$> (char ':' >> integer)
+classP = char ':' >> decimal
 
 aliphaticAtomP :: Parser AtomSymbol
 aliphaticAtomP = AliphaticAtom . read <$> choice aliphatics
-  where aliphatics = string . show <$> [F .. P]
+  where aliphatics = stringP . show <$> [F .. P]
 
 aromaticAtomP :: Parser AtomSymbol
 aromaticAtomP = AromaticAtom . read . fmap toUpper <$> choice aromatics
-  where aromatics = string . fmap toLower . show <$> [B .. P]
+  where aromatics = stringP . fmap toLower . show <$> [B .. P]
 
 wildcardAtomP :: Parser AtomSymbol
 wildcardAtomP = char '*' >> pure WildcardAtom
 
 otherAtomP :: Parser AtomSymbol
-otherAtomP = OtherAtom . pack <$> choice (fmap string lst)
+otherAtomP = OtherAtom . pack <$> choice (fmap stringP lst)
   where lst = ["Zr","Zn","Yb","Y","Xe","W","V","U","Tm","Tl",
                "Ti","Th","Te","Tc","Tb","Ta","Sr","Sn","Sm",
                "Si","Sg","Se","Sc","Sb","Ru","Rn","Rh",

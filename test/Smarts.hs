@@ -53,6 +53,12 @@ doubleBond = BondExpression [BondOr [BondExplicitAnd [BondImplicitAnd [Double Pa
 explNa :: AtomExpression
 explNa = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Explicit Pass $ Atom "Na"]]]]
 
+explAR :: AtomExpression
+explAR = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [ArylGroup Pass]]]]
+
+explHB :: AtomExpression
+explHB = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [HeteroarylGroup Pass]]]]
+
 innerStructureTests :: Spec
 innerStructureTests = describe "SMARTS is parsed correctly." $ do
   it "C" $ parseSmarts "C" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [])]])
@@ -67,6 +73,12 @@ innerStructureTests = describe "SMARTS is parsed correctly." $ do
                                                                                 (doubleBond, Primitive (Atom "F") [])]])
   it "C[Na]=F" $ parseSmarts "C[Na]=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                                                                     (implBond, Description explNa []),
+                                                                                    (doubleBond, Primitive (Atom "F") [])]])
+  it "C[AG]=F" $ parseSmarts "C[AG]=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                    (implBond, Description explAR []),
+                                                                                    (doubleBond, Primitive (Atom "F") [])]])
+  it "C[HG]=F" $ parseSmarts "C[HG]=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                    (implBond, Description explHB []),
                                                                                     (doubleBond, Primitive (Atom "F") [])]])
   it "C1C=CC=CC=1" $ parseSmarts "C1C=CC=CC=1" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [Closure implBond 1]),
                                                                                             (implBond, Primitive (Atom "C") []),

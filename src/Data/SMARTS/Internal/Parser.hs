@@ -3,10 +3,11 @@ module Data.SMARTS.Internal.Parser where
 import           Data.Maybe                 (fromMaybe)
 import           Data.SMARTS.Internal.Types
 import           Data.SMILES.Atom           (Chirality (..))
+import           Data.SMILES.ParserTypes    (Parser, stringP)
 import           Data.Text                  (pack)
 import           Text.Megaparsec
-import           Text.Megaparsec.Lexer
-import           Text.Megaparsec.Text
+import           Text.Megaparsec.Char       (char, digitChar)
+import           Text.Megaparsec.Char.Lexer (decimal)
 
 smartsP :: Parser SMARTS
 smartsP = do
@@ -142,7 +143,9 @@ atomExpressionP = AtomExpression <$> atomOrP `sepBy` char ';'
 -- *** Specification parser
 
 specificationP :: Parser Specification
-specificationP = explicitP <|>
+specificationP = arylGroupP <|>
+                 heteroarylGroupP <|>
+                 explicitP <|>
                  degreeP <|>
                  attachedHP <|>
                  implicitHP <|>
@@ -199,7 +202,7 @@ atomicNumberP :: Parser Specification
 atomicNumberP = try $ do
   neg <- negationP
   _ <- char '#'
-  num <- int
+  num <- decimal
   return (AtomicNumber neg num)
 
 chiralityP :: Parser Specification
@@ -207,7 +210,7 @@ chiralityP = try $ do
   neg <- negationP
   _ <- char '@'
   cw <- optional $ char '@'
-  chClass <- optional (read <$> choice (string . show <$> [TH1 .. OH3]))
+  chClass <- optional (read <$> choice (stringP . show <$> [TH1 .. OH3]))
   presence <- presenceP
   case (cw, chClass, presence) of
     (Nothing, Nothing, pres)   -> return (CounterClockwise neg pres)
@@ -218,25 +221,37 @@ chiralityP = try $ do
 atomicMassP :: Parser Specification
 atomicMassP = try $ do
   neg <- negationP
-  num <- int
+  num <- decimal
   return (AtomicMass neg num)
+
+arylGroupP :: Parser Specification
+arylGroupP = try $ do
+  neg <- negationP
+  _   <- stringP "AG"
+  return (ArylGroup neg)
+
+heteroarylGroupP :: Parser Specification
+heteroarylGroupP = try $ do
+  neg <- negationP
+  _   <- stringP "HG"
+  return (HeteroarylGroup neg)
 
 recursiveP :: Parser Specification
 recursiveP = do
   neg <- negationP
-  _ <- string "$("
+  _ <- stringP "$("
   smarts <- smartsP
   _ <- char ')'
   return (Recursive neg smarts)
 
 labelP :: Parser Specification
-labelP = Class <$> (char ':' >> int)
+labelP = Class <$> (char ':' >> decimal)
 
 genericSpecP :: (Negation -> Int -> Specification) -> Char -> Int -> Parser Specification
 genericSpecP constructor sym def = try $ do
   neg <- negationP
   _ <- char sym
-  num <- optional int
+  num <- optional decimal
   return (constructor neg (fromMaybe def num))
 
 
@@ -258,10 +273,10 @@ anyAromaticAtomP :: Parser PrimitiveAtom
 anyAromaticAtomP = char 'a' >> return AnyAromatic
 
 organicAtomP :: Parser PrimitiveAtom
-organicAtomP = Atom . pack <$> choice (fmap string organicAtoms)
+organicAtomP = Atom . pack <$> choice (fmap stringP organicAtoms)
 
 atomP :: Parser PrimitiveAtom
-atomP = Atom . pack <$> choice (fmap string allAtoms)
+atomP = Atom . pack <$> choice (fmap stringP allAtoms)
 
 -- *** Presence parser
 
@@ -281,9 +296,6 @@ negationP = do
   case neg of
     Nothing -> return Pass
     _       -> return Negate
-
-int :: Parser Int
-int = fromIntegral <$> integer
 
 closureP :: Parser RingClosure
 closureP = try $ do

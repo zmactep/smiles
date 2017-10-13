@@ -77,6 +77,8 @@ data Specification = Explicit Negation PrimitiveAtom
                    | ClockwiseCh Negation
                    | ChiralityClass Negation Chirality Presence
                    | AtomicMass Negation Int
+                   | ArylGroup Negation
+                   | HeteroarylGroup Negation
                    | Recursive Negation SMARTS
                    | Class Int
   deriving (Eq, Ord)
@@ -98,6 +100,8 @@ instance Show Specification where
   show (ClockwiseCh neg) = show neg ++ "@@"
   show (ChiralityClass neg chClass pres) = concat [show neg, "@", show chClass, show pres]
   show (AtomicMass neg num) = show neg ++ show num
+  show (ArylGroup neg) = show neg ++ "AG"
+  show (HeteroarylGroup neg) = show neg ++ "HG"
   show (Recursive neg smarts) = concat [show neg, "$(", show smarts, ")"]
   show (Class num) = ':' : show num
 

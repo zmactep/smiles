@@ -24,6 +24,7 @@ library
                      , Data.SMILES
                      , Data.SMILES.Parser
                      , Data.SMILES.Writer
+                     , Data.SMILES.ParserTypes
 
                      -- SMARTS
 
