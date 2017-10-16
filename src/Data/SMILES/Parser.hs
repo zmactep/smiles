@@ -2,7 +2,7 @@ module Data.SMILES.Parser
   ( smilesP
   ) where
 
-import           Text.Megaparsec         (between, char, digitChar, many,
+import           Text.Megaparsec         (between, char, count, digitChar, many,
                                           optional, some, try)
 import           Text.Megaparsec.Lexer   (integer)
 import           Text.Megaparsec.Text    (Parser)
@@ -37,7 +37,7 @@ ringP :: Parser ChainToken
 ringP = do bondMb <- optional bondP
            pcMb <- optional $ char '%'
            i <- case pcMb of
-             Just _  -> fromIntegral <$> integer
+             Just _  -> read <$> count 2 digitChar
              Nothing -> read . pure <$> digitChar
 
            return $ RingClosure bondMb i
