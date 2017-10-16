@@ -1,12 +1,15 @@
-module Data.SMILES.Parser where
+module Data.SMILES.Parser
+  ( smilesP
+  ) where
 
-import           Data.SMILES
-import           Data.SMILES.Atom.Parser
-import           Data.SMILES.Bond.Parser
-import           Data.SMILES.ParserTypes    (Parser)
-import           Text.Megaparsec
+import           Text.Megaparsec            (between, count, many, optional,
+                                             some, try)
 import           Text.Megaparsec.Char       (char, digitChar)
-import           Text.Megaparsec.Char.Lexer (decimal)
+
+import           Data.SMILES                (ChainToken (..), SMILES (..))
+import           Data.SMILES.Atom.Parser    (atomP)
+import           Data.SMILES.Bond.Parser    (bondP)
+import           Data.SMILES.ParserTypes    (Parser)
 
 smilesP :: Parser SMILES
 smilesP = do atom <- atomPackP
@@ -34,7 +37,7 @@ ringP :: Parser ChainToken
 ringP = do bondMb <- optional bondP
            pcMb <- optional $ char '%'
            i <- case pcMb of
-             Just _  -> decimal
+             Just _  -> read <$> count 2 digitChar
              Nothing -> read . pure <$> digitChar
 
            return $ RingClosure bondMb i

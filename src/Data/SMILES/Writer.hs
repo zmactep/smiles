@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.SMILES.Writer (writeSmiles) where
+module Data.SMILES.Writer
+  ( writeSmiles
+  ) where
 
 import           Data.Text               (Text, pack)
 import qualified Data.Text               as T (concat)

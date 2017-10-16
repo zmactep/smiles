@@ -1,7 +1,10 @@
-module Data.SMILES where
+module Data.SMILES
+  ( ChainToken (..)
+  , SMILES (..)
+  ) where
 
-import           Data.SMILES.Atom
-import           Data.SMILES.Bond
+import           Data.SMILES.Atom (Atom (..))
+import           Data.SMILES.Bond (Bond (..))
 
 newtype SMILES = SMILES { getSMILES :: [ChainToken] }
   deriving (Show, Read, Eq, Ord)
