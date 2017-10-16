@@ -1,12 +1,14 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies          #-}
 
-module Data.SMILES.ParserTypes (Parser, stringP) where
-
+module Data.SMILES.ParserTypes
+  ( Parser
+  , stringP
+  ) where
 
 import           Data.Text            (Text, pack, unpack)
 import           Data.Void            (Void)
-import           Text.Megaparsec
+import           Text.Megaparsec      (MonadParsec, Parsec, Tokens)
 import           Text.Megaparsec.Char (string)
 
 type Parser = Parsec Void Text
