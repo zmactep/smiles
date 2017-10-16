@@ -1,12 +1,15 @@
-module Data.SMILES.Parser where
+module Data.SMILES.Parser
+  ( smilesP
+  ) where
 
-import           Text.Megaparsec
-import           Text.Megaparsec.Lexer
-import           Text.Megaparsec.Text
+import           Text.Megaparsec         (between, char, digitChar, many,
+                                          optional, some, try)
+import           Text.Megaparsec.Lexer   (integer)
+import           Text.Megaparsec.Text    (Parser)
 
-import           Data.SMILES
-import           Data.SMILES.Atom.Parser
-import           Data.SMILES.Bond.Parser
+import           Data.SMILES             (ChainToken (..), SMILES (..))
+import           Data.SMILES.Atom.Parser (atomP)
+import           Data.SMILES.Bond.Parser (bondP)
 
 smilesP :: Parser SMILES
 smilesP = do atom <- atomPackP

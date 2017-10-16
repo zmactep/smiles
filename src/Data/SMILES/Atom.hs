@@ -1,4 +1,10 @@
-module Data.SMILES.Atom where
+module Data.SMILES.Atom
+  ( Atom (..)
+  , AtomSymbol (..)
+  , Bracket (..)
+  , Chirality (..)
+  , Organic (..)
+  ) where
 
 import           Data.Char (toLower)
 import           Data.Text (Text, unpack)

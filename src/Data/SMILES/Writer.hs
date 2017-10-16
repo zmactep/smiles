@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.SMILES.Writer (writeSmiles) where
+module Data.SMILES.Writer
+  ( writeSmiles
+  ) where
 
 import           Data.Text               (Text, pack)
 import qualified Data.Text               as T (concat)
@@ -15,9 +17,7 @@ writeToken (Bond b)        = writeBond b
 writeToken (RingClosure Nothing r)  | r < 10 = pack $ show r
                                     | otherwise = pack $ "%" ++ show r
 writeToken (RingClosure (Just b) r) | r < 10 = T.concat [writeBond b, pack $ show r]
-                                    | otherwise = T.concat [pack "%", writeBond b, pack $ show r]
--- writeToken (RingClosure r) | r < 10 = pack $ show r
---                            | otherwise = pack $ "%" ++ show r
+                                    | otherwise = T.concat [writeBond b, pack "%", pack $ show r]
 writeToken (Branch b)      = T.concat ["(", writeSmiles b, ")"]
 
 writeSmiles :: SMILES -> Text

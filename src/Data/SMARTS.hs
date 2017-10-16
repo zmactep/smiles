@@ -1,31 +1,41 @@
-module Data.SMARTS (SMARTS (..),
-                    Component (..),
-                    Branch (..),
-                    BondExpression (..),
-                    AtomExpression (..),
-                    Bond (..),
-                    BondOr (..),
-                    BondExplicitAnd (..),
-                    BondImplicitAnd (..),
-                    SpecificAtom (..),
-                    AtomOr (..),
-                    AtomExplicitAnd (..),
-                    AtomImplicitAnd (..),
-                    Specification (..),
-                    Presence (..),
-                    Negation (..),
-                    Chirality (..),
-                    PrimitiveAtom (..),
-                    parseSmarts,
-                    smartsP,
-                    writeSmarts) where
+module Data.SMARTS
+  ( AtomExplicitAnd (..), AtomImplicitAnd (..)
+  , AtomExpression (..)
+  , AtomOr (..)
+  , Bond (..)
+  , BondExplicitAnd (..), BondImplicitAnd (..)
+  , BondExpression (..)
+  , BondOr (..)
+  , Branch (..)
+  , Chirality (..)
+  , Component (..)
+  , Negation (..)
+  , Presence (..)
+  , PrimitiveAtom (..)
+  , SMARTS (..)
+  , Specification (..)
+  , SpecificAtom (..)
+  , parseSmarts
+  , smartsP
+  , writeSmarts
+  ) where
 
-import           Data.SMARTS.Internal.Parser
-import           Data.SMARTS.Internal.Types
-import           Data.SMARTS.Internal.Writer
+import           Data.SMARTS.Internal.Parser (smartsP)
+import           Data.SMARTS.Internal.Types  (AtomExplicitAnd (..),
+                                              AtomExpression (..),
+                                              AtomImplicitAnd (..), AtomOr (..),
+                                              Bond (..), BondExplicitAnd (..),
+                                              BondExpression (..),
+                                              BondImplicitAnd (..), BondOr (..),
+                                              Branch (..), Component (..),
+                                              Negation (..), Presence (..),
+                                              PrimitiveAtom (..), SMARTS (..),
+                                              SpecificAtom (..),
+                                              Specification (..))
+import           Data.SMARTS.Internal.Writer (writeSmarts)
 import           Data.SMILES.Atom            (Chirality (..))
-import           Data.Text
-import           Text.Megaparsec
+import           Data.Text                   (Text)
+import           Text.Megaparsec             (parseMaybe)
 
 parseSmarts :: Text -> Maybe SMARTS
 parseSmarts = parseMaybe smartsP

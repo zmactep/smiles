@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.SMILES.Atom.Writer (writeAtom)
-                                where
+module Data.SMILES.Atom.Writer
+  ( writeAtom
+  ) where
 
 import           Data.Text        (Text, pack)
 
-import           Data.SMILES.Atom
+import           Data.SMILES.Atom (Atom (..), Bracket (..), Chirality (..))
 
 writeChirality :: Chirality -> String
 writeChirality Clockwise     = "@@"

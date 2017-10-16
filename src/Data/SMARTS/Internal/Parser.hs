@@ -1,12 +1,25 @@
 module Data.SMARTS.Internal.Parser where
 
 import           Data.Maybe                 (fromMaybe)
-import           Data.SMARTS.Internal.Types
+import           Data.SMARTS.Internal.Types (AtomExplicitAnd (..),
+                                             AtomExpression (..),
+                                             AtomImplicitAnd (..), AtomOr (..),
+                                             Bond (..), BondExplicitAnd (..),
+                                             BondExpression (..),
+                                             BondExpression (..),
+                                             BondImplicitAnd (..), BondOr (..),
+                                             Branch (..), Component (..),
+                                             Negation (..), Presence (..),
+                                             PrimitiveAtom (..), SMARTS (..),
+                                             SpecificAtom (..),
+                                             Specification (..))
 import           Data.SMILES.Atom           (Chirality (..))
 import           Data.Text                  (pack)
-import           Text.Megaparsec
-import           Text.Megaparsec.Lexer
-import           Text.Megaparsec.Text
+import           Text.Megaparsec            (between, char, choice, digitChar,
+                                             many, optional, sepBy, some,
+                                             string, try, (<|>))
+import           Text.Megaparsec.Lexer      (integer)
+import           Text.Megaparsec.Text       (Parser)
 
 smartsP :: Parser SMARTS
 smartsP = do

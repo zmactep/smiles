@@ -1,4 +1,8 @@
-module Data.SMILES.Bond where
+module Data.SMILES.Bond
+  ( AliphaticBond (..)
+  , Bond (..)
+  , DoubleConfiguration (..)
+  ) where
 
 data Bond = AliphaticBond AliphaticBond
           | AromaticBond
@@ -7,6 +11,6 @@ data Bond = AliphaticBond AliphaticBond
 
 data DoubleConfiguration = BelowBond | AboveBond
   deriving (Show, Read, Eq, Ord, Bounded, Enum)
-  
+
 data AliphaticBond = SingleBond | DoubleBond | TripleBond | QuadrupleBond
   deriving (Show, Read, Eq, Ord, Bounded, Enum)

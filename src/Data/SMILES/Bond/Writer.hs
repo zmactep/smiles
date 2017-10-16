@@ -1,11 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.SMILES.Bond.Writer (writeBond)
-                                where
+module Data.SMILES.Bond.Writer
+  ( writeBond
+  ) where
 
 import           Data.Text        (Text)
 
-import           Data.SMILES.Bond
+import           Data.SMILES.Bond (AliphaticBond (..), Bond (..),
+                                   DoubleConfiguration (..))
 
 writeBond :: Bond -> Text
 writeBond (AliphaticBond SingleBond)      = "-"

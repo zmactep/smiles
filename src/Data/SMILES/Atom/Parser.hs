@@ -1,12 +1,17 @@
-module Data.SMILES.Atom.Parser where
+module Data.SMILES.Atom.Parser
+  ( atomP
+  ) where
 
 import           Data.Char             (toLower, toUpper)
 import           Data.Text             (pack)
-import           Text.Megaparsec
-import           Text.Megaparsec.Lexer
-import           Text.Megaparsec.Text
+import           Text.Megaparsec       (char, choice, optional, string, try,
+                                        (<|>))
+import           Text.Megaparsec.Lexer (integer)
+import           Text.Megaparsec.Text  (Parser)
 
-import           Data.SMILES.Atom
+import           Data.SMILES.Atom      (Atom (..), AtomSymbol (..),
+                                        Bracket (..), Chirality (..),
+                                        Organic (..))
 
 atomP :: Parser Atom
 atomP = bracketAtomP <|> (SimpleAtom <$> aliphaticAtomP)
