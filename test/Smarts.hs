@@ -59,9 +59,15 @@ explAR = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [ArylGroup Pas
 explHB :: AtomExpression
 explHB = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [HeteroarylGroup Pass]]]]
 
+explA :: AtomExpression
+explA = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Explicit Pass AnyAliphatic]]]]
+
 innerStructureTests :: Spec
 innerStructureTests = describe "SMARTS is parsed correctly." $ do
   it "C" $ parseSmarts "C" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [])]])
+  it "C[A]C" $ parseSmarts "C[A]C" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                (implBond, Description explA []),
+                                                                                (implBond, Primitive (Atom "C") [])]])
   it "CC" $ parseSmarts "CC" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []), (implBond, Primitive (Atom "C") [])]])
   it "CN!-a=F" $ parseSmarts "CN!-a=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                                                                     (implBond, Primitive (Atom "N") []),
