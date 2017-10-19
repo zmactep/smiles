@@ -335,8 +335,8 @@ allAtoms =["Zr","Zn","Yb","Y","Xe","W","V","U","Tm","Tl",
            "Er","Dy","Ds","Db","Cu","Cs","Cr","Co","Cn",
            "Cm","Cl","Cf","Ce","Cd","Ca","C","Br","Bk",
            "Bi","Bh","Be","Ba","B","Au","At","As","Ar",
-           "Am","Al","Ag","Ac","A","se","as","b", "c",
-           "n", "o", "s", "p"]
+           "Am","Al","Ag","Ac","se","as","b", "c", "n",
+           "o", "s", "p"]
 
 organicAtoms :: [String]
 organicAtoms = ["Br", "B", "Cl", "C", "N", "O", "S", "P",
