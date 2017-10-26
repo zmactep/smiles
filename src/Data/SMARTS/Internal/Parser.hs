@@ -75,6 +75,7 @@ bondP = singleP <|>
         upDirectionP <|>
         downDirectionP <|>
         ringP <|>
+        dativeP <|>
         anyBondP
 
 singleP :: Parser Bond
@@ -121,6 +122,12 @@ ringP = try $ do
   _ <- char '@'
   return (Ring neg)
 
+dativeP :: Parser Bond
+dativeP = try $ do
+  neg <- negationP
+  _   <- char '_'
+  return (Dative neg)
+
 anyBondP :: Parser Bond
 anyBondP = do
   neg <- negationP
@@ -151,8 +158,18 @@ atomExplicitAndP = AtomExplicitAnd <$> atomImplicitAndP `sepBy` char '&'
 atomOrP :: Parser AtomOr
 atomOrP = AtomOr <$> atomExplicitAndP `sepBy` char ','
 
+atomPlainExpressionP :: Parser AtomExpression
+atomPlainExpressionP = AtomExpression Pass <$> atomOrP `sepBy` char ';'
+
+atomNegExpressionP :: Parser AtomExpression
+atomNegExpressionP = try $ do
+  _ <- char '!'
+  orExpr <- between (char '{') (char '}') (atomOrP `sepBy` char ';')
+  return (AtomExpression Negate orExpr)
+
 atomExpressionP :: Parser AtomExpression
-atomExpressionP = AtomExpression <$> atomOrP `sepBy` char ';'
+atomExpressionP = atomNegExpressionP <|> atomPlainExpressionP
+
 
 -- *** Specification parser
 
@@ -173,6 +190,7 @@ specificationP = arylGroupP <|>
                  atomicNumberP <|>
                  chiralityP <|>
                  atomicMassP <|>
+                 aromaticNeighboursP <|>
                  recursiveP <|>
                  labelP
 
@@ -249,6 +267,13 @@ heteroarylGroupP = try $ do
   neg <- negationP
   _   <- stringP "HG"
   return (HeteroarylGroup neg)
+
+aromaticNeighboursP :: Parser Specification
+aromaticNeighboursP = try $ do
+  neg <- negationP
+  _   <- stringP "^a"
+  num <- decimal
+  return (AromaticNeighbours neg num)
 
 recursiveP :: Parser Specification
 recursiveP = do

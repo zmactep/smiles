@@ -54,12 +54,14 @@ instance Show AtomOr where
   show (AtomOr expr) = intercalate "," $ map show expr
 
 
-newtype AtomExpression = AtomExpression [AtomOr]
+data AtomExpression = AtomExpression Negation [AtomOr]
   deriving (Eq, Ord)
 
 instance Show AtomExpression where
-  show (AtomExpression expr) = intercalate ";" $ map show expr
-
+  show (AtomExpression neg expr) | neg == Pass = strRepr
+                                 | otherwise   = "!{" ++ strRepr ++ "}2"
+    where
+      strRepr = intercalate ";" $ map show expr
 
 data Specification = Explicit Negation PrimitiveAtom
                    | Degree Negation Int
@@ -79,6 +81,7 @@ data Specification = Explicit Negation PrimitiveAtom
                    | AtomicMass Negation Int
                    | ArylGroup Negation
                    | HeteroarylGroup Negation
+                   | AromaticNeighbours Negation Int
                    | Recursive Negation SMARTS
                    | Class Int
   deriving (Eq, Ord)
@@ -102,6 +105,7 @@ instance Show Specification where
   show (AtomicMass neg num) = show neg ++ show num
   show (ArylGroup neg) = show neg ++ "AG"
   show (HeteroarylGroup neg) = show neg ++ "HG"
+  show (AromaticNeighbours neg num) = show neg ++ "^a" ++ show num
   show (Recursive neg smarts) = concat [show neg, "$(", show smarts, ")"]
   show (Class num) = ':' : show num
 
@@ -133,6 +137,7 @@ data Bond = Single Negation
           | Up Negation Presence
           | Down Negation Presence
           | Ring Negation
+          | Dative Negation
           | AnyBond Negation
           | Implicit
   deriving (Eq, Ord)
@@ -145,6 +150,7 @@ instance Show Bond where
   show (Up neg presence)   = show neg ++ ('/' : show presence)
   show (Down neg presence) = show neg ++ ('\\' : show presence)
   show (Ring neg)          = show neg ++ "@"
+  show (Dative neg)        = show neg ++ "_"
   show (AnyBond neg)       = show neg ++ "~"
   show Implicit            = ""
 

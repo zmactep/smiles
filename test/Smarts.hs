@@ -50,17 +50,30 @@ notSingleBond = BondExpression [BondOr [BondExplicitAnd [BondImplicitAnd [Single
 doubleBond :: BondExpression
 doubleBond = BondExpression [BondOr [BondExplicitAnd [BondImplicitAnd [Double Pass]]]]
 
+dativeBond :: BondExpression
+dativeBond = BondExpression [BondOr [BondExplicitAnd [BondImplicitAnd [Dative Pass]]]]
+
 explNa :: AtomExpression
-explNa = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Explicit Pass $ Atom "Na"]]]]
+explNa = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Explicit Pass $ Atom "Na"]]]]
 
 explAR :: AtomExpression
-explAR = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [ArylGroup Pass]]]]
+explAR = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [ArylGroup Pass]]]]
 
 explHB :: AtomExpression
-explHB = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [HeteroarylGroup Pass]]]]
+explHB = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [HeteroarylGroup Pass]]]]
+
+explCaretA :: Int -> AtomExpression
+explCaretA n = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [AromaticNeighbours Pass n]]]]
 
 explA :: AtomExpression
-explA = AtomExpression [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Explicit Pass AnyAliphatic]]]]
+explA = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Explicit Pass AnyAliphatic]]]]
+
+negExpr :: AtomExpression
+negExpr = AtomExpression Negate [AtomOr [AtomExplicitAnd [AtomImplicitAnd [AromaticNeighbours Pass 2]]
+                                       , AtomExplicitAnd [AtomImplicitAnd [AromaticNeighbours Pass 3]]
+                                       , AtomExplicitAnd [AtomImplicitAnd [HeteroarylGroup Negate]
+                                                        , AtomImplicitAnd [Valence Pass 3
+                                                                         , NegativeCharge Pass 2]]]]
 
 innerStructureTests :: Spec
 innerStructureTests = describe "SMARTS is parsed correctly." $ do
@@ -86,6 +99,15 @@ innerStructureTests = describe "SMARTS is parsed correctly." $ do
   it "C[HG]=F" $ parseSmarts "C[HG]=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                                                                     (implBond, Description explHB []),
                                                                                     (doubleBond, Primitive (Atom "F") [])]])
+  it "C[^a3]=F" $ parseSmarts "C[^a3]=F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                     (implBond, Description (explCaretA 3) []),
+                                                                                     (doubleBond, Primitive (Atom "F") [])]])
+  it "C[^a2]_F" $ parseSmarts "C[^a2]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                      (implBond, Description (explCaretA 2) []),
+                                                                                      (dativeBond, Primitive (Atom "F") [])]])
+  it "C[!{^a2,^a3,!HG&v3-2}]_F" $ parseSmarts "C[!{^a2,^a3,!HG&v3-2}]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                                                      (implBond, Description negExpr []),
+                                                                                                                      (dativeBond, Primitive (Atom "F") [])]])
   it "C1C=CC=CC=1" $ parseSmarts "C1C=CC=CC=1" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [Closure implBond 1]),
                                                                                             (implBond, Primitive (Atom "C") []),
                                                                                             (doubleBond, Primitive (Atom "C") []),
