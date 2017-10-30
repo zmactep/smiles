@@ -3,6 +3,7 @@ module Data.SMARTS.Internal.Types where
 import           Data.List        (intercalate)
 import           Data.SMILES.Atom (Chirality)
 import           Data.Text        (Text, unpack)
+import           Text.Printf      (printf)
 
 data PrimitiveAtom = Any | AnyAliphatic | AnyAromatic | Atom Text
   deriving (Eq, Ord)
@@ -82,6 +83,7 @@ data Specification = Explicit Negation PrimitiveAtom
                    | ArylGroup Negation
                    | HeteroarylGroup Negation
                    | AromaticNeighbours Negation Int
+                   | ChargeInterval Float Float
                    | Recursive Negation SMARTS
                    | Class Int
   deriving (Eq, Ord)
@@ -106,6 +108,7 @@ instance Show Specification where
   show (ArylGroup neg) = show neg ++ "AG"
   show (HeteroarylGroup neg) = show neg ++ "HG"
   show (AromaticNeighbours neg num) = show neg ++ "^a" ++ show num
+  show (ChargeInterval c1 c2) = "(" ++ printf "%.3f" c1 ++ "," ++ printf "%.3f" c2 ++ ")"
   show (Recursive neg smarts) = concat [show neg, "$(", show smarts, ")"]
   show (Class num) = ':' : show num
 
