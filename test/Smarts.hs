@@ -65,6 +65,10 @@ explHB = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Heteroar
 explCaretA :: Int -> AtomExpression
 explCaretA n = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [AromaticNeighbours Pass n]]]]
 
+explCh :: Float -> Float -> AtomExpression
+explCh c1 c2 = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [AromaticNeighbours Pass 2
+                                                                            , ChargeInterval c1 c2]]]]
+
 explA :: AtomExpression
 explA = AtomExpression Pass [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Explicit Pass AnyAliphatic]]]]
 
@@ -105,6 +109,21 @@ innerStructureTests = describe "SMARTS is parsed correctly." $ do
   it "C[^a2]_F" $ parseSmarts "C[^a2]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                                                                       (implBond, Description (explCaretA 2) []),
                                                                                       (dativeBond, Primitive (Atom "F") [])]])
+  it "C[^a2(2,4)]_F" $ parseSmarts "C[^a2(2,4)]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                                (implBond, Description (explCh 2 4) []),
+                                                                                                (dativeBond, Primitive (Atom "F") [])]])
+  it "C[^a2(2.0,-4)]_F" $ parseSmarts "C[^a2(2.0,-4)]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                                      (implBond, Description (explCh 2 (-4)) []),
+                                                                                                      (dativeBond, Primitive (Atom "F") [])]])
+  it "C[^a2(-2.112,4.0471)]_F" $ parseSmarts "C[^a2(-2.112,4.0471)]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                                                    (implBond, Description (explCh (-2.112) 4.0471) []),
+                                                                                                                    (dativeBond, Primitive (Atom "F") [])]])
+  it "C[^a2(-2e3,-4.20)]_F" $ parseSmarts "C[^a2(-2e3,-4.20)]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                                              (implBond, Description (explCh (-2e3) (-4.20)) []),
+                                                                                                              (dativeBond, Primitive (Atom "F") [])]])
+  it "C[^a2(-2e-2,4e+3)]_F" $ parseSmarts "C[^a2(-2e-2,4e+3)]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+                                                                                                              (implBond, Description (explCh (-2e-2) 4e+3) []),
+                                                                                                              (dativeBond, Primitive (Atom "F") [])]])
   it "C[!{^a2,^a3,!HG&v3-2}]_F" $ parseSmarts "C[!{^a2,^a3,!HG&v3-2}]_F" `shouldBe` Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                                                                                                       (implBond, Description negExpr []),
                                                                                                                       (dativeBond, Primitive (Atom "F") [])]])

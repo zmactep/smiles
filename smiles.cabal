@@ -1,5 +1,5 @@
 name:                smiles
-version:             0.2.0.2
+version:             0.2.0.3
 -- synopsis:
 description:         Full support of OpenSMILES and SMARTS specifications for Haskell
 homepage:            https://github.com/zmactep/smiles#readme

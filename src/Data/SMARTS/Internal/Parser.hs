@@ -1,12 +1,7 @@
 module Data.SMARTS.Internal.Parser where
 
+import           Control.Monad              (void)
 import           Data.Maybe                 (fromMaybe)
-import           Data.Text                  (pack)
-import           Text.Megaparsec            (between, choice, many, optional,
-                                             sepBy, some, try, (<|>))
-import           Text.Megaparsec.Char       (char, digitChar)
-import           Text.Megaparsec.Char.Lexer (decimal)
-
 import           Data.SMARTS.Internal.Types (AtomExplicitAnd (..),
                                              AtomExpression (..),
                                              AtomImplicitAnd (..), AtomOr (..),
@@ -22,6 +17,11 @@ import           Data.SMARTS.Internal.Types (AtomExplicitAnd (..),
                                              Specification (..))
 import           Data.SMILES.Atom           (Chirality (..))
 import           Data.SMILES.ParserTypes    (Parser, stringP)
+import           Data.Text                  (pack)
+import           Text.Megaparsec            (between, choice, many, optional,
+                                             sepBy, some, try, (<|>))
+import           Text.Megaparsec.Char       (char, digitChar, space)
+import           Text.Megaparsec.Char.Lexer (decimal, float, signed)
 
 smartsP :: Parser SMARTS
 smartsP = do
@@ -191,6 +191,7 @@ specificationP = arylGroupP <|>
                  chiralityP <|>
                  atomicMassP <|>
                  aromaticNeighboursP <|>
+                 chargeIntervalP <|>
                  recursiveP <|>
                  labelP
 
@@ -275,6 +276,15 @@ aromaticNeighboursP = try $ do
   num <- decimal
   return (AromaticNeighbours neg num)
 
+chargeIntervalP :: Parser Specification
+chargeIntervalP = try $ do
+  _  <- char '('
+  c1 <- floatP
+  _  <- char ','
+  c2 <- floatP
+  _  <- char ')'
+  return (ChargeInterval c1 c2)
+
 recursiveP :: Parser Specification
 recursiveP = do
   neg <- negationP
@@ -335,6 +345,9 @@ negationP = do
   case neg of
     Nothing -> return Pass
     _       -> return Negate
+
+floatP :: Parser Float
+floatP = signed (void $ optional space) (try float <|> (fromIntegral :: Int -> Float) <$> decimal)
 
 closureP :: Parser RingClosure
 closureP = try $ do
