@@ -191,6 +191,8 @@ specificationP = arylGroupP <|>
                  chiralityP <|>
                  atomicMassP <|>
                  aromaticNeighboursP <|>
+                 acidityIntervalP <|>
+                 basicityIntervalP <|>
                  chargeIntervalP <|>
                  recursiveP <|>
                  labelP
@@ -276,14 +278,23 @@ aromaticNeighboursP = try $ do
   num <- decimal
   return (AromaticNeighbours neg num)
 
+acidityIntervalP :: Parser Specification
+acidityIntervalP = intervalP 'a' AcidityInterval
+
+basicityIntervalP :: Parser Specification
+basicityIntervalP = intervalP 'b' BasicityInterval
+
 chargeIntervalP :: Parser Specification
-chargeIntervalP = try $ do
-  _  <- char '('
-  c1 <- floatP
+chargeIntervalP = intervalP 'c' ChargeInterval
+
+intervalP :: Char -> (Float -> Float -> Specification) -> Parser Specification
+intervalP c cons = try $ do
+  _  <- stringP ['(', c]
+  mn <- floatP
   _  <- char ','
-  c2 <- floatP
+  mx <- floatP
   _  <- char ')'
-  return (ChargeInterval c1 c2)
+  return (cons mn mx)
 
 recursiveP :: Parser Specification
 recursiveP = do
