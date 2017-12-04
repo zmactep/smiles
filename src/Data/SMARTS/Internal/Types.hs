@@ -83,6 +83,8 @@ data Specification = Explicit Negation PrimitiveAtom
                    | ArylGroup Negation
                    | HeteroarylGroup Negation
                    | AromaticNeighbours Negation Int
+                   | AcidityInterval Float Float
+                   | BasicityInterval Float Float
                    | ChargeInterval Float Float
                    | Recursive Negation SMARTS
                    | Class Int
@@ -108,7 +110,9 @@ instance Show Specification where
   show (ArylGroup neg) = show neg ++ "AG"
   show (HeteroarylGroup neg) = show neg ++ "HG"
   show (AromaticNeighbours neg num) = show neg ++ "^a" ++ show num
-  show (ChargeInterval c1 c2) = "(" ++ printf "%.3f" c1 ++ "," ++ printf "%.3f" c2 ++ ")"
+  show (AcidityInterval a1 a2) = "(a" ++ printf "%.3f" a1 ++ "," ++ printf "%.3f" a2 ++ ")"
+  show (BasicityInterval b1 b2) = "(b" ++ printf "%.3f" b1 ++ "," ++ printf "%.3f" b2 ++ ")"
+  show (ChargeInterval c1 c2) = "(c" ++ printf "%.3f" c1 ++ "," ++ printf "%.3f" c2 ++ ")"
   show (Recursive neg smarts) = concat [show neg, "$(", show smarts, ")"]
   show (Class num) = ':' : show num
 
