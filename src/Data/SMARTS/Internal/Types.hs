@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Data.SMARTS.Internal.Types where
 
 import           Data.List        (intercalate)
@@ -203,8 +205,35 @@ instance Show Branch where
   show (Linear unit) = show unit
   show (Compound unit branch) = concat ["(", show unit, concatMap show branch, ")"]
 
-newtype SMARTS = SMARTS [Branch]
+data SMARTS = SMARTS { branches  :: [Branch]
+                     , equations :: [Equation]
+                     }
   deriving (Eq, Ord)
 
 instance Show SMARTS where
-  show (SMARTS list) = concatMap show list
+  show SMARTS{..} = concatMap show branches ++ concatMap (\x -> "|" ++ show x) equations
+
+data Equation = Equation [Variable] ResVal deriving (Eq, Ord)
+
+instance Show Equation where
+  show (Equation [] _) = ""
+  show (Equation (x : xs) resVal) = filter (/= '+') (show x) ++ concatMap show xs ++ ">" ++ show resVal
+
+data AtomFeature = Acidicity | Basicity | Charge deriving (Eq, Ord)
+
+instance Show AtomFeature where
+  show Acidicity = "a"
+  show Basicity  = "b"
+  show Charge    = "c"
+
+data Variable = Variable Float Int AtomFeature deriving (Eq, Ord)
+
+instance Show Variable where
+  show (Variable val indOfAtom feature) = addSign ++ printf "%.3f" val ++ "$" ++ show indOfAtom ++ show feature
+    where
+      addSign = if val > 0 then "+" else ""
+
+newtype ResVal = ResVal Float deriving (Eq, Ord)
+
+instance Show ResVal where
+  show (ResVal val) =  printf "%.3f" val

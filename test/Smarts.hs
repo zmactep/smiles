@@ -15,6 +15,8 @@ main = hspec $ do
   stolenFromSmilesTests
   tediousTests
   invalidSyntaxTests
+  equationsTest
+  equationsWritingTest
 
 testSuite :: String -> Expectation
 testSuite target = smarts `shouldSatisfy` smartsCmp target
@@ -90,79 +92,82 @@ negExpr = AtomExpression Negate [AtomOr [AtomExplicitAnd [AtomImplicitAnd [Aroma
 innerStructureTests :: Spec
 innerStructureTests = describe "SMARTS is parsed correctly." $ do
   it "C" $ parseSmarts "C" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [])]])
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [])]])
   it "C[A]C" $ parseSmarts "C[A]C" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description explA []),
                                       (implBond, Primitive (Atom "C") [])]])
   it "CC" $ parseSmarts "CC" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Primitive (Atom "C") [])]])
   it "CN!-a=F" $ parseSmarts "CN!-a=F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Primitive (Atom "N") []),
                                       (notSingleBond, Primitive AnyAromatic []),
                                       (doubleBond, Primitive (Atom "F") [])]])
   it "CNa=F" $ parseSmarts "CNa=F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Primitive (Atom "N") []),
                                       (implBond, Primitive AnyAromatic []),
                                       (doubleBond, Primitive (Atom "F") [])]])
   it "C[Na]=F" $ parseSmarts "C[Na]=F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description explNa []),
                                       (doubleBond, Primitive (Atom "F") [])]])
   it "C[AG]=F" $ parseSmarts "C[AG]=F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description explAR []),
                                       (doubleBond, Primitive (Atom "F") [])]])
   it "C[HG]=F" $ parseSmarts "C[HG]=F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description explHB []),
                                       (doubleBond, Primitive (Atom "F") [])]])
   it "C[^a3]=F" $ parseSmarts "C[^a3]=F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description (explCaretA 3) []),
                                       (doubleBond, Primitive (Atom "F") [])]])
   it "C[^a2]_F" $ parseSmarts "C[^a2]_F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description (explCaretA 2) []),
                                       (dativeBond, Primitive (Atom "F") [])]])
   it "N[^a2(a-1,5)]C" $ parseSmarts "N[^a2(a-1,5)]C" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "N") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "N") []),
                                       (implBond, Description (explAc (-1) 5) []),
                                       (implBond, Primitive (Atom "C") [])]])
   it "C[^a2(c2,4)]_F" $ parseSmarts "C[^a2(c2,4)]_F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description (explCh 2 4) []),
                                       (dativeBond, Primitive (Atom "F") [])]])
   it "C[^a2(c2.0,-4)]_F" $ parseSmarts "C[^a2(c2.0,-4)]_F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description (explCh 2 (-4)) []),
                                       (dativeBond, Primitive (Atom "F") [])]])
   it "C[^a2(c-2.112,4.0471)]_F" $ parseSmarts "C[^a2(c-2.112,4.0471)]_F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description (explCh (-2.112) 4.0471) []),
                                       (dativeBond, Primitive (Atom "F") [])]])
   it "C[^a2(c-2e3,-4.20)]_F" $ parseSmarts "C[^a2(c-2e3,-4.20)]_F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description (explCh (-2e3) (-4.20)) []),
                                       (dativeBond, Primitive (Atom "F") [])]])
   it "C[^a2(c-2e-2,4e+3)]_F" $ parseSmarts "C[^a2(c-2e-2,4e+3)]_F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description (explCh (-2e-2) 4e+3) []),
                                       (dativeBond, Primitive (Atom "F") [])]])
   it "C[!{^a2,^a3,!HG&v3-2}]_F" $ parseSmarts "C[!{^a2,^a3,!HG&v3-2}]_F" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") []),
                                       (implBond, Description negExpr []),
                                       (dativeBond, Primitive (Atom "F") [])]])
   it "C1C=CC=CC=1" $ parseSmarts "C1C=CC=CC=1" `shouldBe`
-    Just (SMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [Closure implBond 1]),
+    Just (toSMARTS [Linear $ Component [(implBond, Primitive (Atom "C") [Closure implBond 1]),
                                       (implBond, Primitive (Atom "C") []),
                                       (doubleBond, Primitive (Atom "C") []),
                                       (implBond, Primitive (Atom "C") []),
                                       (doubleBond, Primitive (Atom "C") []),
                                       (implBond, Primitive (Atom "C") [Closure doubleBond 1])]])
+
+toSMARTS :: [Branch] -> SMARTS
+toSMARTS branches = SMARTS branches []
 
 basicTests :: Spec
 basicTests = describe "Simple syntax constructions." $ do
@@ -322,3 +327,25 @@ invalidSyntaxTests = describe "Parser should fail on these." $ do
   invalidSyntax "C[(1,2)]C"
   invalidSyntax "C[(c1, 2)]C"
   invalidSyntax "C[(d0,3)]C"
+
+equationsTest :: Spec
+equationsTest = describe "SMARTS with equations." $ do
+    it "One dimension" $ do
+        fmap equations (parseSmarts "[C:1][C:2][AG:3]|0.2$3a>0.5") `shouldBe` (Just [ Equation [ Variable 0.2 3 Acidicity ] (ResVal 0.5) ])
+    it "Trick" $ do
+        fmap equations (parseSmarts "[C:1][C:2][AG:3]|42$3a>0.5") `shouldBe` (Just [ Equation [ Variable 42 3 Acidicity ] (ResVal 0.5) ])
+    it "Two dimensions" $ do
+        fmap equations (parseSmarts "[C:1][C:2][AG:3]|0.2$3a-0.5$2b>0.5") `shouldBe` (Just [ Equation [ Variable 0.2 3 Acidicity
+                                                                                                      , Variable (-0.5) 2 Basicity
+                                                                                                      ] (ResVal 0.5) ])
+    it "Three dimensions" $ do
+        fmap equations (parseSmarts "[C:1][C:2][AG:3]|-0.2$3a-0.5$2b+0.01$1c>-0.5") `shouldBe` (Just [ Equation [ Variable (-0.2) 3 Acidicity
+                                                                                                                , Variable (-0.5) 2 Basicity
+                                                                                                                , Variable 0.01 1 Charge
+                                                                                                                ] (ResVal (-0.5))])
+equationsWritingTest :: Spec
+equationsWritingTest = describe "Check writing of equations." $ do
+  thereAndBackAgain "[C:1][C:2][AG:3]|0.200$3a>0.500"
+  thereAndBackAgain "[C:1][C:2][AG:3]|0.200$3a-0.500$2b>0.500"
+  thereAndBackAgain "[C:1][C:2][AG:3]|-0.200$3a-0.500$2b+0.010$1c>-0.500"
+  thereAndBackAgain "[C:1][C:2][AG:3][O:4][B:5]|-0.200$3a-0.500$2b+0.010$1c>-0.500|-0.700$5a-0.100$4b>2.000"
