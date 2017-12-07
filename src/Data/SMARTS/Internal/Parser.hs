@@ -4,29 +4,31 @@ import           Control.Monad              (void)
 import           Data.Maybe                 (fromMaybe)
 import           Data.SMARTS.Internal.Types (AtomExplicitAnd (..),
                                              AtomExpression (..),
+                                             AtomFeature (..),
                                              AtomImplicitAnd (..), AtomOr (..),
                                              Bond (..), BondExplicitAnd (..),
                                              BondExpression (..),
                                              BondExpression (..),
                                              BondImplicitAnd (..), BondOr (..),
                                              Branch (..), Component (..),
-                                             Negation (..), Presence (..),
-                                             PrimitiveAtom (..),
-                                             RingClosure (..), SMARTS (..),
-                                             SpecificAtom (..),
-                                             Specification (..))
+                                             Equation (..), Negation (..),
+                                             Presence (..), PrimitiveAtom (..),
+                                             ResVal (..), RingClosure (..),
+                                             SMARTS (..), SpecificAtom (..),
+                                             Specification (..), Variable (..))
 import           Data.SMILES.Atom           (Chirality (..))
 import           Data.SMILES.ParserTypes    (Parser, stringP)
 import           Data.Text                  (pack)
 import           Text.Megaparsec            (between, choice, many, optional,
                                              sepBy, some, try, (<|>))
-import           Text.Megaparsec.Char       (char, digitChar, space)
+import           Text.Megaparsec.Char       (anyChar, char, digitChar, space)
 import           Text.Megaparsec.Char.Lexer (decimal, float, signed)
 
 smartsP :: Parser SMARTS
 smartsP = do
   other <- many branchP
-  return (SMARTS other)
+  eqs <- many equationP
+  return (SMARTS other eqs)
 
 -- *** Branch parser
 
@@ -358,7 +360,10 @@ negationP = do
     _       -> return Negate
 
 floatP :: Parser Float
-floatP = signed (void $ optional space) (try float <|> (fromIntegral :: Int -> Float) <$> decimal)
+floatP = signed (void $ optional space) sci
+
+sci :: Parser Float
+sci = try float <|> (fromIntegral :: Int -> Float) <$> decimal
 
 closureP :: Parser RingClosure
 closureP = try $ do
@@ -390,3 +395,27 @@ allAtoms =["Zr","Zn","Yb","Y","Xe","W","V","U","Tm","Tl",
 organicAtoms :: [String]
 organicAtoms = ["Br", "B", "Cl", "C", "N", "O", "S", "P",
                 "F", "I", "b", "c", "n", "o", "s", "p"]
+
+-- *** Equation parser
+
+equationP :: Parser Equation
+equationP = do
+    _ <- char '|'
+    variables <- many variableP
+    resVal <- resValP
+    return (Equation variables resVal)
+
+variableP :: Parser Variable
+variableP = Variable <$> signed (pure ()) sci <*> (char '$' *> decimal) <*> atomFeatureP
+
+atomFeatureP :: Parser AtomFeature
+atomFeatureP = do
+    charVal <- anyChar
+    case charVal of
+      'a' -> return Acidicity
+      'b' -> return Basicity
+      'c' -> return Charge
+      _   -> fail "Unknown atom feature"
+
+resValP :: Parser ResVal
+resValP = ResVal <$> (char '>' *> floatP)
