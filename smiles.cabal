@@ -1,5 +1,5 @@
 name:                smiles
-version:             0.2.2.0
+version:             0.2.2.1
 -- synopsis:
 description:         Full support of OpenSMILES and SMARTS specifications for Haskell
 homepage:            https://github.com/zmactep/smiles#readme
@@ -33,8 +33,8 @@ library
                      , Data.SMARTS.Internal.Parser
                      , Data.SMARTS.Internal.Writer
   build-depends:       base >= 4.7 && < 5
-                     , megaparsec >= 6.0 && < 6.3
-                     , text >= 0.2 && < 1.3
+                     , megaparsec >= 6.0 && <= 9.6
+                     , text >= 0.2 && <= 2.1
   default-language:    Haskell2010
 
 test-suite smiles-test
@@ -43,8 +43,8 @@ test-suite smiles-test
   main-is:             Spec.hs
   build-depends:       base
                      , smiles
-                     , QuickCheck >= 2.9 && < 2.11
-                     , hspec >= 2.4.1 && < 2.5
+                     , QuickCheck >= 2.9 
+                     , hspec >= 2.4.1 
                      , megaparsec
                      , text
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N

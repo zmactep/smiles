@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 module Data.SMARTS.Internal.Parser where
 
 import           Control.Monad              (void)
@@ -19,9 +20,15 @@ import           Data.SMARTS.Internal.Types (AtomExplicitAnd (..),
 import           Data.SMILES.Atom           (Chirality (..))
 import           Data.SMILES.ParserTypes    (Parser, stringP)
 import           Data.Text                  (pack)
+#if MIN_VERSION_megaparsec(7,0,0)
+import           Text.Megaparsec            (anySingle,between, choice, many, optional,
+                                             sepBy, some, try, (<|>))
+import           Text.Megaparsec.Char       (char, digitChar, space)
+#else
 import           Text.Megaparsec            (between, choice, many, optional,
                                              sepBy, some, try, (<|>))
 import           Text.Megaparsec.Char       (anyChar, char, digitChar, space)
+#endif
 import           Text.Megaparsec.Char.Lexer (decimal, float, signed)
 
 smartsP :: Parser SMARTS
@@ -410,7 +417,11 @@ variableP = Variable <$> signed (pure ()) sci <*> (char '$' *> decimal) <*> atom
 
 atomFeatureP :: Parser AtomFeature
 atomFeatureP = do
+#if MIN_VERSION_megaparsec(7,0,0)
+    charVal <- anySingle
+#else
     charVal <- anyChar
+#endif
     case charVal of
       'a' -> return Acidicity
       'b' -> return Basicity
